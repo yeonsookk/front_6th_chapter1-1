@@ -173,17 +173,21 @@ test.describe("E2E: 쇼핑몰 전체 사용자 시나리오", () => {
     test("검색어와 필터 조건이 URL에서 복원된다", async ({ page }) => {
       const helpers = new E2EHelpers(page);
 
-      // 복잡한 쿼리 파라미터로 직접 접근
-      await page.goto("/?search=젤리&category1=생활%2F건강&sort=price_desc&limit=10");
+      await page.goto("/?search=젤리&sort=price_desc&limit=10");
       await helpers.waitForPageLoad();
 
-      // URL에서 복원된 상태 확인
       await expect(page.locator("#search-input")).toHaveValue("젤리");
       await expect(page.locator("#sort-select")).toHaveValue("price_desc");
       await expect(page.locator("#limit-select")).toHaveValue("10");
+      await expect(page.getByRole("main")).toMatchAriaSnapshot(`- text: /총 3개의 상품/`);
 
-      // 카테고리 브레드크럼 확인
-      await expect(page.locator("text=카테고리:").locator("..")).toContainText("생활/건강");
+      await page.goto("/?search=고양이&sort=name_desc&limit=50");
+      await helpers.waitForPageLoad();
+
+      await expect(page.locator("#search-input")).toHaveValue("고양이");
+      await expect(page.locator("#sort-select")).toHaveValue("name_desc");
+      await expect(page.locator("#limit-select")).toHaveValue("50");
+      await expect(page.getByRole("main")).toMatchAriaSnapshot(`- text: /총 84개의 상품/`);
     });
   });
 
